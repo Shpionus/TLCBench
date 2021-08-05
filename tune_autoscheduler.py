@@ -8,10 +8,12 @@ from utils import get_network, make_network_key
 
 network_to_n_trials = {
     # CPU
+    ("vgg_11", 1, "float32", "llvm"): 20000,
     ("resnet_50", 1, "float32", "llvm"): 22000,
     ("mobilenet_v2", 1, "float32", "llvm"): 16000,
     ("bert", 1, "float32", "llvm"): 12000,
     # GPU
+    ("vgg_11", 1, "float32", "cuda"): 20000,
     ("resnet_50", 1, "float32", "cuda"): 20000,
     ("mobilenet_v2", 1, "float32", "cuda"): 16000,
     ("bert", 1, "float32", "cuda"): 12000,
@@ -64,7 +66,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--network",
         type=str,
-        choices=["resnet_50", "mobilenet_v2", "bert", "all"],
+        choices=["vgg_11", "resnet_50", "mobilenet_v2", "bert", "all"],
         default="all",
         help="The name of the neural network.",
     )
@@ -82,7 +84,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.network == "all":
-        networks = ["resnet_50", "mobilenet_v2", "bert"]
+        networks = ["vgg_11", "resnet_50", "mobilenet_v2", "bert"]
     else:
         networks = [args.network]
     batch_sizes = [args.batch_size]

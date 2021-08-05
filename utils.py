@@ -36,6 +36,20 @@ def get_network(name, batch_size, dtype, layout):
             mod = convert_to_nhwc(mod)
         else:
             assert layout == "NCHW"
+    elif name == "vgg_11":
+        import mxnet
+
+        multiplier = 11
+        block = mxnet.gluon.model_zoo.vision.get_vgg(
+            multiplier, pretrained=True
+        )
+        mod, params = relay.frontend.from_mxnet(
+            block, shape={"data": input_shape}, dtype=dtype
+        )
+        if layout == "NHWC":
+            mod = convert_to_nhwc(mod)
+        else:
+            assert layout == "NCHW"
     elif name == "bert":
         import gluonnlp
 
