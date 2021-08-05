@@ -5,9 +5,10 @@ import numpy as np
 
 import tvm
 from tvm import relay, auto_scheduler
-import tvm.contrib.graph_runtime as runtime
+import tvm.contrib.graph_executor as runtime
 
 from utils import get_network, make_network_key
+
 
 def benchmark(network, batch_size, dtype, target, log_file, repeat):
     layout = "NHWC"
@@ -15,7 +16,8 @@ def benchmark(network, batch_size, dtype, target, log_file, repeat):
         network, batch_size, dtype, layout
     )
 
-    assert os.path.exists(log_file), "The log file '%s' does not exist." % log_file
+    assert os.path.exists(
+        log_file), "The log file '%s' does not exist." % log_file
     print("Use log file %s" % log_file)
 
     if network in ["bert"]:
@@ -26,7 +28,7 @@ def benchmark(network, batch_size, dtype, target, log_file, repeat):
             ):
                 lib = relay.build(mod, target=target, params=params)
 
-        ctx = tvm.context(str(target), 0)
+        ctx = tvm.device(str(target), 0)
         module = runtime.GraphModule(lib["default"](ctx))
 
         # Feed input data
@@ -42,7 +44,7 @@ def benchmark(network, batch_size, dtype, target, log_file, repeat):
                 opt_level=3, config={"relay.backend.use_auto_scheduler": True}
             ):
                 lib = relay.build(mod, target=target, params=params)
-        ctx = tvm.context(str(target), 0)
+        ctx = tvm.device(str(target), 0)
         module = runtime.GraphModule(lib["default"](ctx))
 
         # Feed input data
@@ -50,7 +52,8 @@ def benchmark(network, batch_size, dtype, target, log_file, repeat):
         module.set_input(input_name, data)
 
     # Evaluate
-    ftimer = module.module.time_evaluator("run", ctx, min_repeat_ms=500, repeat=repeat)
+    ftimer = module.module.time_evaluator(
+        "run", ctx, min_repeat_ms=500, repeat=repeat)
     return np.array(ftimer().results)
 
 
@@ -63,14 +66,16 @@ if __name__ == "__main__":
         default="all",
         help="The name of the neural network.",
     )
-    parser.add_argument("--batch-size", type=int, default=1, help="The batch size")
+    parser.add_argument("--batch-size", type=int,
+                        default=1, help="The batch size")
     parser.add_argument(
         "--target",
         type=str,
         default="llvm -model=platinum-8124m -mcpu=skylake-avx512",
         help="The compilation target.",
     )
-    parser.add_argument("--dtype", type=str, default="float32", help="The data type.")
+    parser.add_argument("--dtype", type=str,
+                        default="float32", help="The data type.")
     parser.add_argument(
         "--logdir", type=str, default="tmp_logs/", help="Log file directory."
     )

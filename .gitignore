@@ -3,3 +3,5 @@ __pycache__
 *.swp
 today_job.sh
 total_latency.tsv
+tmp_logs
+*.log
